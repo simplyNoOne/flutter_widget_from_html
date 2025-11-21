@@ -30,6 +30,8 @@ class WidgetFactory extends WidgetFactoryResetter with AnchorWidgetFactory {
   /// Defaults to `false`, resulting in a [CircularProgressIndicator].
   static bool debugDeterministicLoadingWidget = false;
 
+  bool excludePlainTextFromSemantics = false;
+
   final _recognizersNeedDisposing = <GestureRecognizer>[];
 
   BuildOp? _styleBackground;
@@ -62,11 +64,7 @@ class WidgetFactory extends WidgetFactoryResetter with AnchorWidgetFactory {
       );
 
   /// Builds [AspectRatio].
-  Widget? buildAspectRatio(
-    BuildTree tree,
-    Widget child,
-    double aspectRatio,
-  ) =>
+  Widget? buildAspectRatio(BuildTree tree, Widget child, double aspectRatio) =>
       AspectRatio(aspectRatio: aspectRatio, child: child);
 
   /// Builds body widget.
@@ -114,11 +112,7 @@ class WidgetFactory extends WidgetFactoryResetter with AnchorWidgetFactory {
       return children.first;
     }
 
-    return ColumnPlaceholder(
-      children: children,
-      tree: tree,
-      wf: this,
-    );
+    return ColumnPlaceholder(children: children, tree: tree, wf: this);
   }
 
   /// Builds [Column].
@@ -268,7 +262,10 @@ class WidgetFactory extends WidgetFactoryResetter with AnchorWidgetFactory {
     if (recognizer is TapGestureRecognizer) {
       built = MouseRegion(
         cursor: SystemMouseCursors.click,
-        child: GestureDetector(onTap: recognizer.onTap, child: child),
+        child: Semantics(
+          button: true,
+          child: GestureDetector(onTap: recognizer.onTap, child: child),
+        ),
       );
     }
 
@@ -464,6 +461,8 @@ class WidgetFactory extends WidgetFactoryResetter with AnchorWidgetFactory {
     }
 
     return TextSpan(
+      semanticsLabel:
+          (excludePlainTextFromSemantics && recognizer == null) ? "" : text,
       children: children,
       mouseCursor: recognizer != null ? SystemMouseCursors.click : null,
       recognizer: recognizer,
@@ -769,10 +768,7 @@ class WidgetFactory extends WidgetFactoryResetter with AnchorWidgetFactory {
       case kTagKbd:
       case kTagSamp:
       case kTagTt:
-        tree.inherit(
-          text_ops.fontFamily,
-          const [kTagCodeFont1, kTagCodeFont2],
-        );
+        tree.inherit(text_ops.fontFamily, const [kTagCodeFont1, kTagCodeFont2]);
       case kTagPre:
         tree.register(_tagPre ??= TagPre(this).buildOp);
 
@@ -1177,17 +1173,21 @@ class WidgetFactory extends WidgetFactoryResetter with AnchorWidgetFactory {
     return value != null ? {kCssDirection: value} : const {};
   }
 
-  static StylesMap _cssDisplayBlock(dom.Element _) =>
-      {kCssDisplay: kCssDisplayBlock};
+  static StylesMap _cssDisplayBlock(dom.Element _) => {
+        kCssDisplay: kCssDisplayBlock,
+      };
 
-  static StylesMap _cssDisplayNone(dom.Element _) =>
-      {kCssDisplay: kCssDisplayNone};
+  static StylesMap _cssDisplayNone(dom.Element _) => {
+        kCssDisplay: kCssDisplayNone,
+      };
 
-  static StylesMap _cssDisplayTable(dom.Element _) =>
-      {kCssDisplay: kCssDisplayTable};
+  static StylesMap _cssDisplayTable(dom.Element _) => {
+        kCssDisplay: kCssDisplayTable,
+      };
 
-  static StylesMap _cssTextAlignCenter(dom.Element _) =>
-      {kCssTextAlign: kCssTextAlignCenter};
+  static StylesMap _cssTextAlignCenter(dom.Element _) => {
+        kCssTextAlign: kCssTextAlignCenter,
+      };
 
   static StylesMap _cssTextAlignFromAttribute(dom.Element element) {
     final value = element.attributes[kAttributeAlign];
@@ -1200,14 +1200,17 @@ class WidgetFactory extends WidgetFactoryResetter with AnchorWidgetFactory {
     return value != null ? {kCssTextAlign: value} : const {};
   }
 
-  static StylesMap _cssTextDecorationLineThrough(dom.Element _) =>
-      {kCssTextDecorationLine: kCssTextDecorationLineThrough};
+  static StylesMap _cssTextDecorationLineThrough(dom.Element _) => {
+        kCssTextDecorationLine: kCssTextDecorationLineThrough,
+      };
 
-  static StylesMap _cssTextDecorationUnderline(dom.Element _) =>
-      {kCssTextDecorationLine: kCssTextDecorationUnderline};
+  static StylesMap _cssTextDecorationUnderline(dom.Element _) => {
+        kCssTextDecorationLine: kCssTextDecorationUnderline,
+      };
 
-  static StylesMap _cssVerticalAlignMiddle(dom.Element _) =>
-      {kCssVerticalAlign: kCssVerticalAlignMiddle};
+  static StylesMap _cssVerticalAlignMiddle(dom.Element _) => {
+        kCssVerticalAlign: kCssVerticalAlignMiddle,
+      };
 
   static StylesMap _tagAcronym(dom.Element _) => {
         kCssTextDecorationLine: kCssTextDecorationUnderline,

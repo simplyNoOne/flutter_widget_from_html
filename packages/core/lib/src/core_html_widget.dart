@@ -58,6 +58,11 @@ class HtmlWidget extends StatefulWidget {
   /// the default handler will be skipped.
   final FutureOr<bool> Function(String url)? onTapUrl;
 
+  /// Avoid screen readers from reading plain text inside
+  /// This can be useful when the surrounding context already provides
+  /// sufficient information and screen readers should not traverse text sections.
+  final bool? excludePlainTextFromSemantics;
+
   /// The values that should trigger rebuild.
   ///
   /// By default, these fields' changes will invalidate cached widget tree:
@@ -109,6 +114,7 @@ class HtmlWidget extends StatefulWidget {
     List<dynamic>? rebuildTriggers,
     this.renderMode = RenderMode.column,
     this.textStyle,
+    this.excludePlainTextFromSemantics,
   }) : _rebuildTriggers = rebuildTriggers;
 
   @override
@@ -144,6 +150,8 @@ class HtmlWidgetState extends State<HtmlWidget> {
     _wf = widget.factoryBuilder?.call() ?? WidgetFactory();
 
     _wf.reset(this);
+    _wf.excludePlainTextFromSemantics =
+        widget.excludePlainTextFromSemantics ?? false;
 
     if (buildAsync) {
       _future = _buildAsync();
